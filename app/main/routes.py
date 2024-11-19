@@ -39,6 +39,9 @@ def standings(week=None):
     # Get MNF predictions for the week
     mnf_predictions = MNFPrediction.query.filter_by(week=selected_week).all()
     
+    # Get MNF total for the week if games are completed
+    mnf_total = MNFPrediction.get_mnf_actual_total(selected_week)
+    
     # Calculate weekly records and prepare user data
     standings_data = []
     for user in users:
@@ -148,7 +151,8 @@ def standings(week=None):
                          standings=standings_data,
                          season_standings=season_standings,
                          season_total=sum(1 for g in GameCache.query.all() if g.status == 'STATUS_FINAL'),
-                         nfl_teams={k.upper(): v for k, v in NFL_TEAMS.items()})
+                         nfl_teams={k.upper(): v for k, v in NFL_TEAMS.items()},
+                         mnf_total=mnf_total)
 
 # Removed old make_picks route as it's been replaced by picks.picks
 

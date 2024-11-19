@@ -35,3 +35,12 @@ class MNFPrediction(db.Model):
 
     def __repr__(self):
         return f'<MNFPrediction Week:{self.week} Points:{self.total_points}>'
+
+    @staticmethod
+    def get_mnf_actual_total(week):
+        """Get the actual total points for MNF games in a given week."""
+        from app.models.game import GameCache
+        mnf_games = GameCache.query.filter_by(week=week, is_mnf=True, status='STATUS_FINAL').all()
+        if not mnf_games:
+            return None
+        return sum(game.home_score + game.away_score for game in mnf_games)

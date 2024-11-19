@@ -6,7 +6,12 @@
         <div class="col-12">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Week {{ current_week }} Standings</h5>
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 me-3">Week {{ current_week }} Standings</h5>
+                        {% if mnf_total is not none %}
+                            <span class="badge bg-primary">MNF Total: {{ mnf_total }}</span>
+                        {% endif %}
+                    </div>
                     <div>
                         {% if current_week > 1 %}
                         <a href="{{ url_for('main.standings', week=current_week-1) }}" class="btn btn-sm btn-outline-primary">
@@ -29,7 +34,7 @@
                                     <th>User</th>
                                     <th>Correct</th>
                                     <th>Percentage</th>
-                                    <th>MNF Points</th>
+                                    <th>MNF {% if mnf_total is not none %}({{ mnf_total }}){% endif %}</th>
                                     <th>Picks</th>
                                 </tr>
                             </thead>
@@ -40,7 +45,23 @@
                                     <td>{{ user.username }}</td>
                                     <td>{{ user.weekly_correct }}</td>
                                     <td>{{ "%.1f"|format(user.weekly_percentage) }}%</td>
-                                    <td>{{ user.mnf_prediction if user.mnf_prediction else 'No Pick' }}</td>
+                                    <td>
+                                        {% if user.mnf_prediction %}
+                                            {{ user.mnf_prediction }}
+                                            {% if mnf_total is not none %}
+                                                {% set diff = user.mnf_prediction - mnf_total %}
+                                                {% if diff > 0 %}
+                                                    <span class="text-danger">(+{{ diff }})</span>
+                                                {% elif diff < 0 %}
+                                                    <span class="text-success">({{ diff }})</span>
+                                                {% else %}
+                                                    <span class="text-warning">(=)</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% else %}
+                                            No Pick
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         <div class="picks-container d-flex flex-nowrap overflow-auto">
                                             {% for pick in user.picks %}
